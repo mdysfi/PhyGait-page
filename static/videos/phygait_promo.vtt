@@ -1,0 +1,124 @@
+WEBVTT
+
+00:00.600 --> 00:01.620
+PhyGait.
+
+00:01.920 --> 00:04.059
+Controllable generation of human gait,
+
+00:04.059 --> 00:06.817
+and the ground reaction forces that come with it.
+
+00:08.417 --> 00:12.997
+Walking data with ground reaction forces drives wearable robot control,
+
+00:12.997 --> 00:17.448
+rehabilitation, clinical gait analysis, and biomechanical simulation.
+
+00:19.048 --> 00:22.360
+But collecting it takes motion capture, force plates,
+
+00:22.360 --> 00:26.360
+and hours of lab time for every subject, so datasets stay small.
+
+00:26.660 --> 00:28.655
+What if we could generate it instead?
+
+00:30.255 --> 00:35.131
+Today's text-driven motion generators can't hit a precise walking speed or cadence,
+
+00:35.131 --> 00:37.951
+they give no forces, and their feet often slide.
+
+00:38.251 --> 00:42.566
+Biomechanics needs numeric control, full-body motion with forces,
+
+00:42.566 --> 00:45.354
+and stable, physically consistent contact.
+
+00:46.954 --> 00:50.853
+PhyGait takes just two numbers: walking speed and cadence.
+
+00:51.153 --> 00:55.468
+A compact transformer diffusion model turns them into full-body motion,
+
+00:55.468 --> 00:57.960
+together with the forces under both feet,
+
+00:57.960 --> 01:01.972
+while physics-aware training keeps contacts and forces consistent.
+
+01:03.572 --> 01:05.741
+Generation starts from pure noise.
+
+01:06.041 --> 01:09.322
+Step by step, motion and forces are refined together,
+
+01:09.322 --> 01:10.993
+until a clean walk emerges,
+
+01:10.993 --> 01:13.841
+with the familiar double-peaked force pattern.
+
+01:15.441 --> 01:18.221
+Every generated walk comes with its own forces,
+
+01:18.221 --> 01:22.243
+and the achieved speed and cadence closely match what was requested.
+
+01:25.441 --> 01:28.149
+One model covers the whole range,
+
+01:28.149 --> 01:31.186
+from slow walking to a brisk 1.7 m/s.
+
+01:32.786 --> 01:35.315
+And the same input never gives the same walk.
+
+01:35.615 --> 01:38.353
+Each sample is a different, natural gait.
+
+01:39.953 --> 01:44.738
+Across 13,800 samples, the average speed error is just 5 mm/s,
+
+01:44.738 --> 01:50.063
+with the same accuracy at speeds the model never saw during training.
+
+01:51.663 --> 01:53.484
+The forces look real.
+
+01:53.784 --> 01:57.085
+Most stance phases show the characteristic double peak,
+
+01:57.085 --> 01:59.605
+peak loads are typical of healthy walking,
+
+01:59.605 --> 02:02.966
+and force begins the moment the foot touches the ground.
+
+02:04.566 --> 02:06.190
+And they obey physics.
+
+02:06.490 --> 02:12.015
+The force implied by the body's own motion matches the generated force,
+
+02:12.015 --> 02:13.494
+with an R² of 0.89,
+
+02:13.494 --> 02:17.540
+close to the 0.93 measured on real force-plate data.
+
+02:19.140 --> 02:23.061
+Feet stay planted, sliding even less than in real motion capture,
+
+02:23.061 --> 02:26.197
+and the samples are as diverse as real walking data.
+
+02:27.797 --> 02:28.805
+PhyGait.
+
+02:29.105 --> 02:32.253
+Controllable, physically consistent gait and forces,
+
+02:32.253 --> 02:33.585
+from just two numbers.

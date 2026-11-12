@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PhyGait: Controllable Gait and GRF Generation</title>
+  <meta name="description" content="PhyGait: controllable diffusion-based human gait generation and ground reaction force estimation, conditioned on walking speed and cadence. ICCAS 2026.">
+  <meta property="og:title" content="PhyGait: Controllable Diffusion-Based Human Gait Generation and Ground Reaction Force Estimation">
+  <meta property="og:description" content="Full-body walking and 3-D ground reaction forces from two numbers: speed and cadence. ICCAS 2026.">
+  <meta property="og:image" content="https://mdysfi.github.io/PhyGait_page/static/images/overview.png">
+  <meta property="og:url" content="https://mdysfi.github.io/PhyGait_page/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314213D'/%3E%3Ctext x='32' y='44' font-family='Arial,sans-serif' font-size='34' font-weight='700' text-anchor='middle' fill='%23E07A2E'%3EPG%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #14213D; --ink: #374151; --muted: #6B7280; --line: #E5E7EB;
+      --blue: #2E6DB4; --blue-t: #EAF1FA; --orange: #E07A2E; --orange-t: #FCEFE4;
+      --teal: #2A9D8F; --teal-t: #E6F4F2; --bg: #FFFFFF; --soft: #F7F8FA;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: Inter, system-ui, sans-serif;
+           font-size: 17px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+    img, video { max-width: 100%; display: block; }
+    a { color: var(--blue); }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+    section { padding: 56px 0; }
+    section.alt { background: var(--soft); }
+    h1, h2, h3 { color: var(--navy); line-height: 1.25; margin: 0; }
+    .eyebrow { text-align: center; font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--blue); margin-bottom: 6px; }
+    .eyebrow.orange { color: var(--orange); } .eyebrow.teal { color: var(--teal); }
+    h2 { font-size: 30px; font-weight: 800; text-align: center; margin-bottom: 8px; }
+    .lead { text-align: center; color: var(--muted); max-width: 740px; margin: 0 auto 32px; }
+    figure { margin: 0; }
+    figcaption { color: var(--muted); font-size: 14.5px; text-align: center; margin-top: 10px; }
+    sub { line-height: 0; }
+
+    /* hero */
+    .hero { padding: 64px 0 24px; text-align: center; }
+    .hero h1 { font-size: 46px; font-weight: 800; letter-spacing: -.01em; }
+    .hero h1 .accent { color: var(--orange); }
+    .subtitle { font-size: 22px; font-weight: 600; color: var(--navy); max-width: 820px; margin: 12px auto 22px; line-height: 1.4; }
+    .authors { display: flex; justify-content: center; gap: 8px 36px; flex-wrap: wrap; }
+    .author { font-size: 18px; font-weight: 600; color: var(--navy); line-height: 1.3; }
+    .affil { color: var(--muted); font-size: 15px; margin-top: 10px; }
+    .logos { display: flex; justify-content: center; align-items: center; gap: 36px; margin: 26px 0; flex-wrap: wrap; }
+    .logos img { height: 40px; width: auto; }
+    .buttons { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 999px; background: var(--navy);
+           color: #fff; text-decoration: none; font-weight: 600; font-size: 15px; }
+    .btn svg { width: 18px; height: 18px; }
+    .btn.soon { background: #9CA3AF; cursor: default; }
+    .btn .tag { font-size: 11px; font-weight: 600; background: rgba(255,255,255,.25); padding: 1px 7px; border-radius: 999px; }
+
+    /* teaser */
+    .teaser { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .vcard { background: #fff; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+    .vcard video { width: 100%; }
+    .vlabel { padding: 10px 14px 12px; font-size: 14px; line-height: 1.5; }
+    .vlabel b { color: var(--navy); }
+    .vlabel span { color: var(--muted); }
+
+    .prose { max-width: 820px; margin: 0 auto; }
+    .prose p { margin: 0 0 14px; }
+
+    /* layout helpers */
+    .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; align-items: start; }
+    .card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+    .card h3 { font-size: 18px; margin-bottom: 6px; }
+    .card p { margin: 0; font-size: 15.5px; }
+    .num { width: 30px; height: 30px; flex: none; border-radius: 50%; display: grid; place-items: center; color: #fff;
+           font-weight: 700; font-size: 15px; }
+    .card .num { margin-bottom: 12px; }
+    .bg-blue { background: var(--blue); } .bg-orange { background: var(--orange); } .bg-teal { background: var(--teal); } .bg-navy { background: var(--navy); }
+    .panel { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+    .callout { background: var(--blue-t); border: 1px solid #C9DBF1; border-radius: 12px; padding: 14px 18px; color: var(--navy); }
+    .nw { white-space: nowrap; }
+    .promo { margin-top: 48px; }
+    .promo h2 { margin-bottom: 24px; }
+    .promo .lead { margin-bottom: 18px; }
+    .promo video { width: 100%; border-radius: 14px; border: 1px solid var(--line); background: var(--navy); }
+
+    /* applications */
+    .app { text-align: center; padding: 18px; }
+    .app img { height: 150px; width: auto; margin: 0 auto 12px; object-fit: contain; }
+    .app h3 { font-size: 17px; margin-bottom: 4px; }
+    .app p { font-size: 14.5px; color: var(--muted); }
+
+    /* numbered list */
+    .steps { display: flex; flex-direction: column; gap: 18px; }
+    .step { display: flex; gap: 14px; align-items: flex-start; }
+    .step h3 { font-size: 18px; margin-bottom: 2px; }
+    .step p { margin: 0; font-size: 15.5px; }
+
+    /* problem */
+    .vs { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .vs .card { padding: 24px; }
+    .vs .card.need { background: var(--blue-t); border-color: #D4E2F3; }
+    .vs .sub { color: var(--muted); font-size: 14px; margin: 0 0 14px; }
+    .prompt { background: #fff; border: 1.5px solid var(--line); border-radius: 999px; padding: 8px 16px; text-align: center;
+              font-weight: 600; color: var(--navy); margin-bottom: 16px; }
+    .need .prompt { border-color: var(--blue); }
+    .vs ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+    .vs li { display: flex; gap: 10px; align-items: center; font-size: 15.5px; }
+    .ico { width: 24px; height: 24px; flex: none; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 13px; font-weight: 700; }
+    .ico.x { background: #6B7280; } .ico.ok { background: var(--blue); }
+
+    /* losses */
+    .eq { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px; text-align: center;
+          color: var(--navy); font-size: 17px; margin-bottom: 18px; overflow-x: auto; }
+    .loss { display: flex; gap: 14px; align-items: flex-start; }
+    .loss .w { margin-left: auto; color: var(--muted); font-size: 13px; white-space: nowrap; }
+    .loss-head { display: flex; align-items: baseline; gap: 8px; }
+    .newton { background: var(--teal-t); border-color: #CBE7E3; }
+    .formula { background: #fff; border-radius: 10px; padding: 10px; text-align: center; font-size: 18px; color: var(--navy); margin: 12px 0 8px; }
+
+    /* stats / results */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .stat { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 18px; text-align: center; }
+    .stat .v { font-size: 30px; font-weight: 800; color: var(--navy); line-height: 1.1; }
+    .stat .l { font-size: 14px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+    .stat.blue .v { color: var(--blue); } .stat.orange .v { color: var(--orange); } .stat.teal .v { color: var(--teal); }
+    .result { margin-top: 52px; }
+    .result:first-of-type { margin-top: 0; }
+    .result h3 { font-size: 22px; margin-bottom: 6px; }
+    .result > p { margin: 0 0 18px; max-width: 840px; }
+
+    .concl h3 { font-size: 13px; letter-spacing: .12em; margin-bottom: 12px; }
+    .concl .row { display: flex; align-items: baseline; gap: 10px; margin-top: 6px; }
+    .concl .row b { font-size: 24px; color: var(--navy); white-space: nowrap; }
+    .concl .row span { font-size: 14.5px; color: var(--muted); }
+
+    .pair { row-gap: 14px; align-items: stretch; }
+    .pair p { margin: 0; }
+    .pair .panel { display: flex; align-items: center; justify-content: center; }
+    .pair .panel img { max-height: 380px; width: auto; }
+    pre { background: var(--navy); color: #E5E7EB; padding: 20px; border-radius: 12px; overflow-x: auto;
+          font-family: "JetBrains Mono", monospace; font-size: 14px; line-height: 1.6; margin: 0; }
+    .bib { position: relative; max-width: 820px; margin: 0 auto; }
+    .copy { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,.12); color: #fff; border: 0;
+            border-radius: 8px; padding: 6px 12px; font: 600 13px Inter, sans-serif; cursor: pointer; }
+    footer { padding: 32px 0 48px; text-align: center; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
+
+
+    /* gallery */
+    .gal-video { width: 100%; border-radius: 14px; border: 1px solid var(--line); background: #fff; }
+    .gal-block { margin-top: 44px; }
+    .gal-block h3 { font-size: 22px; margin-bottom: 4px; }
+    .gal-block > p { margin: 0 0 16px; color: var(--ink); max-width: 860px; }
+    .viewer { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 28px; align-items: center; }
+    .viewer video { width: 100%; border-radius: 14px; border: 1px solid var(--line); background: #fff; aspect-ratio: 1 / 1; }
+    .ctl h4 { margin: 0 0 8px; font-size: 13px; letter-spacing: .1em; color: var(--muted); }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+    .chip { border: 1.5px solid var(--line); background: #fff; color: var(--navy); border-radius: 999px; padding: 7px 14px;
+            font: 600 15px Inter, sans-serif; cursor: pointer; transition: all .15s; }
+    .chip:hover { border-color: var(--blue); }
+    .chip.on { background: var(--navy); border-color: var(--navy); color: #fff; }
+    .readout { background: var(--blue-t); border: 1px solid #C9DBF1; border-radius: 12px; padding: 14px 18px; font-size: 15.5px; color: var(--navy); }
+    .readout .a { color: var(--teal); font-weight: 700; }
+    .hint { font-size: 14px; color: var(--muted); margin-top: 12px; }
+    details { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 20px; margin-top: 16px; }
+    details summary { cursor: pointer; font-weight: 700; color: var(--navy); }
+    details[open] summary { margin-bottom: 12px; }
+    @media (max-width: 860px) { .viewer { grid-template-columns: 1fr; } }
+    @media (max-width: 860px) {
+      .hero h1 { font-size: 36px; } .subtitle { font-size: 18px; }
+      .teaser, .grid3, .grid2, .vs { grid-template-columns: 1fr; }
+      .pair > :nth-child(2) { order: 3; } .pair > :nth-child(3) { order: 2; } .pair > :nth-child(4) { order: 4; }
+      .grid4, .stats { grid-template-columns: repeat(2, 1fr); }
+      section { padding: 40px 0; }
+      h2 { font-size: 26px; }
+    }
+    @media (max-width: 480px) {
+      .grid4 { grid-template-columns: 1fr; }
+      .app img { height: 120px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================== HERO ============================== -->
+<header class="hero">
+  <div class="wrap">
+    <h1>Phy<span class="accent">Gait</span></h1>
+    <p class="subtitle">Controllable Diffusion-Based Human Gait Generation and Ground Reaction Force Estimation</p>
+    <div class="authors">
+      <div class="author">Mohammad Yousefi, &nbsp;Gunhee Lee, &nbsp;Kyoungchul Kong</div>
+    </div>
+    <div class="affil">Department of Mechanical Engineering, KAIST, Daejeon, Korea</div>
+    <div class="logos">
+      <img src="static/images/logo_kaist.png" alt="KAIST">
+      <img src="static/images/logo_exolab.png" alt="EXO LAB" style="height:48px">
+      <img src="static/images/logo_iccas_navy.png" alt="ICCAS 2026">
+    </div>
+    <div class="buttons">
+      <span class="btn soon" title="Coming soon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        Paper <span class="tag">soon</span></span>
+      <span class="btn soon" title="Coming soon">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.4-4-1.4-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></svg>
+        Code <span class="tag">soon</span></span>
+      <a class="btn" href="#video">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>
+        Video</a>
+      <a class="btn" href="#bibtex">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z"/></svg>
+        BibTeX</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============================== OVERVIEW + TEASER ============================== -->
+<section style="padding-top:24px">
+  <div class="wrap">
+    <figure class="panel" style="padding:20px 24px">
+      <img src="static/images/overview.png" alt="Speed and cadence go into the PhyGait transformer diffusion model, which outputs full-body motion and 6-channel ground reaction forces">
+    </figure>
+    <p class="lead" style="margin:28px auto 22px">Two numbers in, full-body walking and ground reaction forces out.
+      Each walker and its force curves are generated together by PhyGait.</p>
+    <div class="teaser">
+      <div class="vcard">
+        <video autoplay muted loop playsinline poster="static/videos/walk_s080_c160_poster.png" src="static/videos/walk_s080_c160.mp4"></video>
+        <div class="vlabel"><b>0.8 m/s · 1.6 steps/s</b><br><span>achieved 0.801 m/s · 1.609 steps/s</span></div>
+      </div>
+      <div class="vcard">
+        <video autoplay muted loop playsinline poster="static/videos/walk_s120_c180_poster.png" src="static/videos/walk_s120_c180.mp4"></video>
+        <div class="vlabel"><b>1.2 m/s · 1.8 steps/s</b><br><span>achieved 1.199 m/s · 1.818 steps/s</span></div>
+      </div>
+      <div class="vcard">
+        <video autoplay muted loop playsinline poster="static/videos/walk_s160_c200_poster.png" src="static/videos/walk_s160_c200.mp4"></video>
+        <div class="vlabel"><b>1.6 m/s · 2.0 steps/s</b><br><span>achieved 1.603 m/s · 2.022 steps/s</span></div>
+      </div>
+    </div>
+    <p class="lead" style="font-size:14.5px;margin:14px auto 0;max-width:none">Typical samples, not hand-picked best ones: each video shows the median-cadence-error sample out of 20.</p>
+
+    <div class="promo" id="video">
+      <h2>Video overview</h2>
+      <video controls preload="metadata" playsinline poster="static/videos/phygait_promo_poster.jpg">
+        <source src="static/videos/phygait_promo.mp4" type="video/mp4">
+        <track kind="captions" srclang="en" label="English" src="static/videos/phygait_promo.vtt">
+      </video>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== ABSTRACT ============================== -->
+<section class="alt">
+  <div class="wrap">
+    <h2>Abstract</h2>
+    <div class="prose" style="margin-top:20px">
+      <p>Generating physically plausible human gait with explicit control over biomechanical parameters is motivated by applications such as clinical gait analysis, rehabilitation, wearable robot control, and biomechanical simulation. Existing human motion generation models are typically conditioned on text descriptions or action labels, which provide limited control over quantitative gait variables such as walking speed and cadence. They also commonly generate only kinematics, without ground reaction forces (GRFs) needed for biomechanical analysis.</p>
+      <p>In this work, we propose <b>PhyGait</b>, a diffusion-based framework that generates full-body human gait motion and six-channel GRFs conditioned on target speed and cadence. The framework uses a transformer-based denoising network with continuous gait conditioning, adaptive layer normalization, joint motion-GRF generation, and gait-specific physical consistency losses. Trained on 8,953 laboratory motion-capture gait clips collected from two treadmill datasets, PhyGait was evaluated across 13,800 generated samples spanning 115 speed–cadence conditions over speeds of <span class="nw">0.75–1.7 m/s</span> and cadences of <span class="nw">1.5–2.1 steps/s</span>. It accurately followed the target gait conditions, with speed and cadence mean absolute errors of <span class="nw">0.005 m/s</span> and <span class="nw">0.049 steps/s</span>, respectively, while generating realistic motions, stable foot-ground contacts, and biomechanically plausible GRF profiles. These results demonstrate the potential of diffusion models for generating controllable and biomechanically plausible synthetic gait data.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== GALLERY ============================== -->
+<section id="explore">
+  <div class="wrap">
+    <div class="eyebrow">EXPLORE</div>
+    <h2>Pick a speed and a cadence</h2>
+    <p class="lead">Every clip below was generated by PhyGait from the two numbers you choose, with its own ground reaction forces.
+      Each one is the median sample out of 20 for that input, not the best one.</p>
+    <div class="viewer">
+      <video id="vw" autoplay muted loop playsinline></video>
+      <div class="ctl">
+        <h4>WALKING SPEED</h4><div class="chips" id="vs"></div>
+        <h4>CADENCE</h4><div class="chips" id="vc"></div>
+        <div class="readout" id="vr"></div>
+        <p class="hint">Each speed offers cadences the model reproduces closely. The options shift upward at higher speeds, because fast walking with slow, long steps falls outside the range people (and our training data) actually walk in.</p>
+      </div>
+    </div>
+
+    <div class="gal-block">
+      <h3>Ten walking speeds, one model</h3>
+      <p>0.8 to 1.7 m/s in 0.1 m/s steps, each at a typical cadence for its speed. All ten start together; the faster walkers pull ahead.</p>
+      <video class="gal-video lazy" muted loop playsinline preload="none" poster="static/videos/gallery/sweep_speed_poster.jpg"
+             data-src="static/videos/gallery/sweep_speed.mp4"></video>
+    </div>
+
+    <div class="gal-block">
+      <h3>Same speed, seven cadences</h3>
+      <p>All walkers at 1.0 m/s, with cadence from 1.5 to 2.1 steps/s. They cover the same distance, but higher cadences take quicker, shorter steps,
+        a distinction a text prompt like “walk faster” cannot express.</p>
+      <video class="gal-video lazy" muted loop playsinline preload="none" poster="static/videos/gallery/sweep_cadence_poster.jpg"
+             data-src="static/videos/gallery/sweep_cadence.mp4"></video>
+    </div>
+
+    <div class="gal-block">
+      <h3>Same input, different walkers</h3>
+      <p>Five samples for one request, 1.2 m/s at 1.8 steps/s. Each hits the requested speed and cadence, yet arm swing, step width
+        and posture differ from walker to walker, the natural variety a diffusion model draws from rather than one averaged gait.</p>
+      <video class="gal-video lazy" muted loop playsinline preload="none" poster="static/videos/gallery/sweep_diversity_poster.jpg"
+             data-src="static/videos/gallery/sweep_diversity.mp4"></video>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== WHY ============================== -->
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow">MOTIVATION</div>
+    <h2>Gait data with forces is valuable, but expensive to measure</h2>
+    <p class="lead">Exoskeleton control, rehabilitation, clinical analysis and simulation all need large, diverse walking data with <b>both</b> motion and
+      ground reaction forces (GRFs). Measuring it takes motion capture, force plates and lab time for every subject, and
+      today's text-driven motion generators can't produce it.</p>
+    <div class="grid4">
+      <div class="card app"><img src="static/images/app_exo.png" alt=""><h3>Wearable robot control</h3><p>Train and test exoskeleton and prosthesis controllers</p></div>
+      <div class="card app"><img src="static/images/app_rehab.png" alt=""><h3>Rehabilitation</h3><p>Plan and monitor gait training</p></div>
+      <div class="card app"><img src="static/images/app_clinic.png" alt=""><h3>Clinical gait analysis</h3><p>Compare patients with healthy references</p></div>
+      <div class="card app"><img src="static/images/app_sim.png" alt=""><h3>Biomechanical simulation</h3><p>Drive musculoskeletal and physics models</p></div>
+    </div>
+    <div class="vs" style="margin-top:28px">
+      <div class="card">
+        <h3>Text-conditioned motion diffusion</h3>
+        <p class="sub">existing text-to-motion models</p>
+        <div class="prompt">“a person walks fast” &nbsp;→&nbsp; <span style="color:var(--muted);font-weight:500">1.2 m/s? 1.4 m/s?</span></div>
+        <ul>
+          <li><span class="ico x">✕</span><span>No numeric control of speed or cadence</span></li>
+          <li><span class="ico x">✕</span><span>Kinematics only: no GRFs</span></li>
+          <li><span class="ico x">✕</span><span>Foot sliding and unstable contact</span></li>
+        </ul>
+      </div>
+      <div class="card need">
+        <h3>PhyGait</h3>
+        <p class="sub">what biomechanics needs</p>
+        <div class="prompt"><i>v</i> = 1.40 m/s, &nbsp;<i>c</i> = 1.90 steps/s</div>
+        <ul>
+          <li><span class="ico ok">✓</span><span>Direct numeric control of speed and cadence</span></li>
+          <li><span class="ico ok">✓</span><span>Full-body motion <b>and</b> 3-axis GRFs together</span></li>
+          <li><span class="ico ok">✓</span><span>Stable contact and physically consistent forces</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== METHOD ============================== -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">METHOD</div>
+    <h2>One diffusion process for motion and forces</h2>
+    <p class="lead">Each 5-second clip is a 100 × 269 sequence: 263 HumanML3D motion features plus 6 GRF channels (3-D force under each foot).
+      A compact transformer (4 layers, 4.7 M parameters) denoises motion and forces together, and speed and cadence steer every layer through adaptive LayerNorm.</p>
+    <figure class="panel">
+      <img src="static/images/fig_denoise.png" alt="Reverse diffusion: vertical GRF emerging from noise over 50 steps">
+    </figure>
+    <figcaption>Real reverse-diffusion trajectory of one sample (v = 1.25 m/s, c = 1.8 steps/s): the vertical GRF of both feet emerges from noise in 50 steps.</figcaption>
+
+    <figure class="panel" style="margin-top:40px"><img src="static/images/architecture.png" alt="PhyGait architecture: transformer encoder with adaptive LayerNorm conditioned on gait and timestep"></figure>
+    <h3 style="font-size:20px;margin:36px 0 14px;text-align:center">Physics-aware training</h3>
+    <div class="grid4">
+      <div class="card"><div class="num bg-blue">1</div><h3>Foot contact</h3><p>No sliding while a foot is on the ground</p></div>
+      <div class="card"><div class="num bg-blue">2</div><h3>Gait control</h3><p>Generated speed and step frequency match the targets</p></div>
+      <div class="card"><div class="num bg-orange">3</div><h3>Swing-phase force</h3><p>Zero force when the foot is in the air</p></div>
+      <div class="card"><div class="num bg-teal">4</div><h3>Newton consistency</h3><p>Vertical force matches the center-of-mass acceleration of the generated body</p></div>
+    </div>
+
+    <details>
+      <summary>Training data</summary>
+      <div class="grid2" style="align-items:center">
+        <div>
+          <p style="margin:0 0 10px">8,953 five-second clips from two lab treadmill collections with instrumented-treadmill GRFs,
+            converted to overground walking (measured belt speed integrated into the root) and to HumanML3D features at 20 Hz.
+            Speed and cadence labels are extracted from the motion itself.</p>
+          <p style="margin:0"><b>Collection 1:</b> 8 subjects · 0.8 / 1.2 / 1.6 m/s<br><b>Collection 2:</b> 21 subjects · 0.75 / 1.00 / 1.25 m/s</p>
+        </div>
+        <figure><img src="static/images/fig_dataset.png" alt="Speed–cadence distribution of the training clips"></figure>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ============================== RESULTS ============================== -->
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow orange">RESULTS</div>
+    <h2>Evaluation: 115 speed–cadence conditions, 13,800 samples</h2>
+    <p class="lead">Speeds 0.75–1.7 m/s and cadences 1.5–2.1 steps/s, 120 samples per condition.</p>
+
+    <div class="result">
+      <h3>Accurate, continuous control</h3>
+      <p>Speed error <b>0.005 m/s</b> (r > 0.999), including speeds between the training speeds; cadence error <b>0.049 steps/s</b> (r = 0.92).</p>
+      <div class="grid2">
+        <figure class="panel"><img src="static/images/ctrl_speed.png" alt="Requested vs achieved speed"></figure>
+        <figure class="panel"><img src="static/images/ctrl_cadence.png" alt="Requested vs achieved cadence"></figure>
+      </div>
+    </div>
+
+    <div class="result">
+      <h3>Realistic ground reaction forces</h3>
+      <div class="stats" style="margin:14px 0 18px">
+        <div class="stat orange"><div class="v">1.13 BW</div><div class="l">mean peak vertical force</div></div>
+        <div class="stat orange"><div class="v">0.023 BW</div><div class="l">mean force during swing</div></div>
+        <div class="stat orange"><div class="v">83.8%</div><div class="l">stances with the double-peak (M) shape</div></div>
+        <div class="stat orange"><div class="v">0 ms</div><div class="l">force onset vs. foot contact</div></div>
+      </div>
+      <figure class="panel"><img src="static/images/grf_2x3.png" alt="Generated left vertical GRF profiles under different conditions"></figure>
+      <figcaption>Left-foot vertical GRF, 6 samples per condition (dark: one representative sample).</figcaption>
+    </div>
+
+    <div class="result">
+      <h3>Forces obey Newton's law with the motion</h3>
+      <div class="grid2" style="align-items:center;margin-top:12px">
+        <div>
+          <p style="margin:0 0 14px">From the generated joints we compute the center of mass and the force its motion implies, and compare it with the generated GRF.
+            The same check on real force-plate data sets the upper limit.</p>
+          <div class="stats" style="grid-template-columns:1fr 1fr">
+            <div class="stat teal"><div class="v">R² 0.89</div><div class="l">PhyGait, vertical force</div></div>
+            <div class="stat"><div class="v">R² 0.93</div><div class="l">real force plates (limit)</div></div>
+          </div>
+        </div>
+        <figure class="panel"><img src="static/images/newton_check.png" alt="Force–motion agreement, Pearson r, real vs PhyGait"></figure>
+      </div>
+    </div>
+
+    <div class="result">
+      <h3>Stable foot contact, diverse samples</h3>
+      <div class="grid2 pair" style="margin-top:12px">
+        <p><b>0.62 cm</b> mean stance-foot sliding, lower than the processed motion capture itself (0.68 cm).</p>
+        <p><b>1.04</b> generated-to-real diversity ratio: samples spread like real walking data, with varied gaits for the same input.</p>
+        <figure class="panel"><img src="static/images/foot_sliding.png" alt="Distribution of stance-foot sliding"></figure>
+        <figure class="panel"><img src="static/images/pca_embedding.png" alt="PCA embedding of generated and real gaits"></figure>
+      </div>
+    </div>
+
+    <details style="margin-top:40px">
+      <summary>Design choices (ablations)</summary>
+      <ul style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px">
+        <li><b>adaLN vs. additive conditioning:</b> speed error drops about 6× (0.064 → 0.011 m/s) when the condition modulates every layer.</li>
+        <li><b>Model size:</b> a larger 6-layer, 384-dim model does not improve control over the 4-layer, 256-dim one.</li>
+        <li><b>Sampler:</b> 50-step respaced DDPM matches 1,000-step sampling at about 20× the speed and beats deterministic DDIM.</li>
+      </ul>
+    </details>
+  </div>
+</section>
+
+<!-- ============================== BIBTEX ============================== -->
+<section id="bibtex">
+  <div class="wrap">
+    <h2 style="margin-bottom:24px">BibTeX</h2>
+    <div class="bib">
+      <button class="copy" onclick="navigator.clipboard.writeText(document.getElementById('bib').innerText).then(()=>{this.textContent='Copied';setTimeout(()=>this.textContent='Copy',1500)})">Copy</button>
+<pre id="bib">@inproceedings{yousefi2026phygait,
+  title     = {Controllable Diffusion-Based Human Gait Generation
+               and Ground Reaction Force Estimation},
+  author    = {Yousefi, Mohammad and Lee, Gunhee and Kong, Kyoungchul},
+  booktitle = {Proceedings of the International Conference on
+               Control, Automation and Systems (ICCAS)},
+  year      = {2026}
+}</pre>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    EXO LAB, Department of Mechanical Engineering, KAIST &nbsp;·&nbsp; Contact: <a href="mailto:mohammad.yousefi@kaist.ac.kr">mohammad.yousefi@kaist.ac.kr</a><br>
+    Generic diffusion utilities are adapted from open-source diffusion implementations; motion features follow the HumanML3D representation.
+  </div>
+</footer>
+
+<script>
+const GRID = {"speeds":[0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.6],"cadences":{"0.8":[1.5,1.6,1.7,1.8],"0.9":[1.5,1.65,1.8,1.95],"1.0":[1.5,1.7,1.9,2.1],"1.1":[1.75,1.85,1.95,2.1],"1.2":[1.6,1.8,1.95,2.1],"1.3":[1.6,1.8,1.95,2.1],"1.4":[1.7,1.85,1.95,2.1],"1.6":[2.0,2.1]},"clips":[{"v":0.8,"c":1.5,"file":"walk_s080_c150.mp4","a_speed":0.8,"a_cad":1.481},{"v":0.8,"c":1.6,"file":"walk_s080_c160.mp4","a_speed":0.801,"a_cad":1.609},{"v":0.8,"c":1.7,"file":"walk_s080_c170.mp4","a_speed":0.8,"a_cad":1.687},{"v":0.8,"c":1.8,"file":"walk_s080_c180.mp4","a_speed":0.801,"a_cad":1.818},{"v":0.9,"c":1.5,"file":"walk_s090_c150.mp4","a_speed":0.898,"a_cad":1.474},{"v":0.9,"c":1.65,"file":"walk_s090_c165.mp4","a_speed":0.901,"a_cad":1.667},{"v":0.9,"c":1.8,"file":"walk_s090_c180.mp4","a_speed":0.897,"a_cad":1.818},{"v":0.9,"c":1.95,"file":"walk_s090_c195.mp4","a_speed":0.899,"a_cad":1.975},{"v":1.0,"c":1.5,"file":"walk_s100_c150.mp4","a_speed":0.994,"a_cad":1.522},{"v":1.0,"c":1.7,"file":"walk_s100_c170.mp4","a_speed":1.002,"a_cad":1.687},{"v":1.0,"c":1.9,"file":"walk_s100_c190.mp4","a_speed":0.999,"a_cad":1.895},{"v":1.0,"c":2.1,"file":"walk_s100_c210.mp4","a_speed":0.998,"a_cad":2.118},{"v":1.1,"c":1.75,"file":"walk_s110_c175.mp4","a_speed":1.104,"a_cad":1.728},{"v":1.1,"c":1.85,"file":"walk_s110_c185.mp4","a_speed":1.099,"a_cad":1.839},{"v":1.1,"c":1.95,"file":"walk_s110_c195.mp4","a_speed":1.099,"a_cad":1.935},{"v":1.1,"c":2.1,"file":"walk_s110_c210.mp4","a_speed":1.103,"a_cad":2.118},{"v":1.2,"c":1.6,"file":"walk_s120_c160.mp4","a_speed":1.2,"a_cad":1.579},{"v":1.2,"c":1.8,"file":"walk_s120_c180.mp4","a_speed":1.199,"a_cad":1.818},{"v":1.2,"c":1.95,"file":"walk_s120_c195.mp4","a_speed":1.197,"a_cad":1.957},{"v":1.2,"c":2.1,"file":"walk_s120_c210.mp4","a_speed":1.203,"a_cad":2.118},{"v":1.3,"c":1.6,"file":"walk_s130_c160.mp4","a_speed":1.292,"a_cad":1.609},{"v":1.3,"c":1.8,"file":"walk_s130_c180.mp4","a_speed":1.299,"a_cad":1.818},{"v":1.3,"c":1.95,"file":"walk_s130_c195.mp4","a_speed":1.297,"a_cad":1.935},{"v":1.3,"c":2.1,"file":"walk_s130_c210.mp4","a_speed":1.302,"a_cad":2.118},{"v":1.4,"c":1.7,"file":"walk_s140_c170.mp4","a_speed":1.396,"a_cad":1.728},{"v":1.4,"c":1.85,"file":"walk_s140_c185.mp4","a_speed":1.396,"a_cad":1.839},{"v":1.4,"c":1.95,"file":"walk_s140_c195.mp4","a_speed":1.39,"a_cad":1.928},{"v":1.4,"c":2.1,"file":"walk_s140_c210.mp4","a_speed":1.411,"a_cad":2.118},{"v":1.6,"c":2.0,"file":"walk_s160_c200.mp4","a_speed":1.603,"a_cad":2.022},{"v":1.6,"c":2.1,"file":"walk_s160_c210.mp4","a_speed":1.625,"a_cad":2.069}]};
+(function () {
+  if (!GRID) return;
+  const vw = document.getElementById('vw'), vs = document.getElementById('vs'), vc = document.getElementById('vc'), vr = document.getElementById('vr');
+  const clip = (v, c) => GRID.clips.find(k => k.v === v && k.c === c);
+  let sv = 1.2, sc = 1.8;
+  const cads = v => GRID.cadences[v.toFixed(1)];
+  const fmt = c => Math.round(c * 100) % 10 ? c.toFixed(2) : c.toFixed(1);
+  function render() {
+    vs.innerHTML = ''; vc.innerHTML = '';
+    GRID.speeds.forEach(v => { const b = document.createElement('button'); b.className = 'chip' + (v === sv ? ' on' : '');
+      b.textContent = v.toFixed(1) + ' m/s'; b.onclick = () => { sv = v; if (!clip(sv, sc)) sc = nearest(); render(); }; vs.appendChild(b); });
+    cads(sv).forEach(c => { const b = document.createElement('button'); b.className = 'chip' + (c === sc ? ' on' : '');
+      b.textContent = fmt(c) + ' steps/s'; b.onclick = () => { sc = c; render(); }; vc.appendChild(b); });
+    const k = clip(sv, sc);
+    if (!vw.src.endsWith(k.file)) { vw.src = 'static/videos/gallery/' + k.file; vw.poster = vw.src.replace('.mp4', '_poster.png'); vw.play().catch(() => {}); }
+    vr.innerHTML = `Requested <b>${k.v.toFixed(1)} m/s · ${fmt(k.c)} steps/s</b><br>Generated <span class="a">${k.a_speed.toFixed(3)} m/s · ${k.a_cad.toFixed(3)} steps/s</span>`;
+  }
+  function nearest() { const ok = cads(sv); return ok.reduce((a, c) => Math.abs(c - sc) < Math.abs(a - sc) ? c : a, ok[0]); }
+  render();
+})();
+// play gallery videos only when they scroll into view
+const io = new IntersectionObserver(es => es.forEach(e => {
+  const v = e.target;
+  if (e.isIntersecting) { if (!v.src) v.src = v.dataset.src; v.play().catch(() => {}); } else v.pause();
+}), { threshold: 0.25 });
+document.querySelectorAll('video.lazy').forEach(v => io.observe(v));
+</script>
+</body>
+</html>
